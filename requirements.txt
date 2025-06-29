@@ -1,0 +1,30 @@
+# Core ML libraries
+scikit-learn
+pandas
+numpy
+
+# Data processing and validation
+pyyaml
+
+# Visualization
+matplotlib
+seaborn
+
+# Model serialization
+joblib
+
+# Testing
+pytest
+pytest-cov
+
+# Logging and utilities
+python-dateutil
+
+# Google Cloud (for future use)
+google-cloud-aiplatform
+google-cloud-storage
+
+# Development tools
+black
+flake8
+mypy 
