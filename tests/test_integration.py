@@ -74,10 +74,15 @@ class TestIntegrationPipeline(unittest.TestCase):
             'species': ['virginica'] * 50
         }
         
-        # Combine all data
+        # Combine all data properly
         all_data = {}
         for key in setosa_data.keys():
-            all_data[key] = setosa_data[key] + versicolor_data[key] + virginica_data[key]
+            if key == 'species':
+                # For species column, concatenate lists
+                all_data[key] = setosa_data[key] + versicolor_data[key] + virginica_data[key]
+            else:
+                # For numeric columns, concatenate numpy arrays
+                all_data[key] = np.concatenate([setosa_data[key], versicolor_data[key], virginica_data[key]])
         
         # Create DataFrame and save
         df = pd.DataFrame(all_data)
