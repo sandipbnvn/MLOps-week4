@@ -87,23 +87,26 @@ jobs:
           echo "" >> report.md
           
           # Extract accuracy score using Python
-          python -c "
+          python -c '
 import json
 import sys
 
 try:
-    with open('artifacts/metrics.json', 'r') as f:
+    with open("artifacts/metrics.json", "r") as f:
         data = json.load(f)
     
-    metrics = data.get('metrics', {})
-    accuracy = metrics.get('accuracy', 'N/A')
+    metrics = data.get("metrics", {})
+    accuracy = metrics.get("accuracy", "N/A")
     
-    print(f'**Accuracy Score:** {accuracy:.4f}' if isinstance(accuracy, (int, float)) else f'**Accuracy Score:** {accuracy}')
+    if isinstance(accuracy, (int, float)):
+        print(f"**Accuracy Score:** {accuracy:.4f}")
+    else:
+        print(f"**Accuracy Score:** {accuracy}")
     
 except Exception as e:
-    print(f'**Error loading metrics:** {str(e)}')
+    print(f"**Error loading metrics:** {str(e)}")
     sys.exit(1)
-" >> report.md
+' >> report.md
         
         else
           echo "## ❌ Pipeline Failed" >> report.md
