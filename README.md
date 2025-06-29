@@ -159,7 +159,7 @@ The pipeline evaluates models using multiple metrics:
 
 The GitHub Actions workflow automatically:
 
-1. **Runs Tests**: Unit tests, integration tests, and code quality checks
+1. **Runs Tests**: Unit tests and integration tests
 2. **Executes Pipeline**: Runs the complete MLOps pipeline
 3. **Generates Reports**: Creates comprehensive performance reports using CML
 4. **Posts Results**: Comments on PRs with accuracy metrics and visualizations
@@ -167,9 +167,17 @@ The GitHub Actions workflow automatically:
 
 ### Workflow Triggers
 
-- **Push to main/develop**: Full pipeline execution
 - **Pull Request**: Validation and testing
 - **Manual trigger**: On-demand execution
+
+### Note on Code Quality
+
+The CI/CD pipeline focuses on functional correctness and model performance rather than code style. Code quality checks (flake8, black) have been intentionally removed to prioritize:
+- **Functional testing** (unit and integration tests)
+- **Pipeline execution** (actual ML pipeline)
+- **Performance reporting** (CML integration)
+
+This approach emphasizes results over code formatting, which is often more important in ML projects.
 
 ## 📈 CML Integration
 
