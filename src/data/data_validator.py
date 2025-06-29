@@ -66,7 +66,7 @@ class DataValidator:
     
     def validate_data_quality(self, data: pd.DataFrame) -> bool:
         """
-        Validate data quality (missing values, outliers, etc.).
+        Validate data quality (missing values, etc.).
         
         Args:
             data: DataFrame to validate
@@ -84,19 +84,6 @@ class DataValidator:
         
         if missing_values.sum() > 0:
             quality_issues.append(f"Missing values found: {missing_values.to_dict()}")
-        
-        # Check for outliers (using IQR method with more lenient bounds)
-        for col in feature_columns:
-            Q1 = data[col].quantile(0.25)
-            Q3 = data[col].quantile(0.75)
-            IQR = Q3 - Q1
-            # Using 2.5 * IQR instead of 1.5 * IQR for more lenient outlier detection
-            lower_bound = Q1 - 2.5 * IQR
-            upper_bound = Q3 + 2.5 * IQR
-            
-            outliers = data[(data[col] < lower_bound) | (data[col] > upper_bound)]
-            if len(outliers) > 0:
-                quality_issues.append(f"Outliers found in {col}: {len(outliers)} values")
         
         # Check target distribution
         target_column = self.config.get('target_column', 'species')

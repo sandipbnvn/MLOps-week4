@@ -98,9 +98,11 @@ class TestDataProcessor(unittest.TestCase):
         self.assertIn('target_distribution', summary)
         self.assertIn('feature_stats', summary)
         
-        self.assertEqual(summary['total_samples'], 5)
+        self.assertEqual(summary['total_samples'], 30)
         self.assertEqual(summary['features'], 4)
         self.assertIn('setosa', summary['target_distribution'])
+        self.assertIn('versicolor', summary['target_distribution'])
+        self.assertIn('virginica', summary['target_distribution'])
 
 
 class TestDataValidator(unittest.TestCase):
@@ -113,13 +115,21 @@ class TestDataValidator(unittest.TestCase):
             'feature_columns': ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
         }
         
-        # Create sample data
+        # Create sample data with more samples and better distribution
         self.sample_data = pd.DataFrame({
-            'sepal_length': [5.1, 4.9, 4.7, 4.6, 5.0],
-            'sepal_width': [3.5, 3.0, 3.2, 3.1, 3.6],
-            'petal_length': [1.4, 1.4, 1.3, 1.5, 1.4],
-            'petal_width': [0.2, 0.2, 0.2, 0.2, 0.2],
-            'species': ['setosa', 'setosa', 'setosa', 'setosa', 'setosa']
+            'sepal_length': [5.1, 4.9, 4.7, 4.6, 5.0, 5.4, 4.6, 5.0, 4.4, 4.9,
+                            5.9, 6.0, 6.1, 5.8, 5.7, 5.9, 6.2, 6.0, 5.8, 6.1,
+                            6.6, 6.7, 6.8, 6.5, 6.4, 6.7, 6.9, 6.6, 6.5, 6.8],
+            'sepal_width': [3.5, 3.0, 3.2, 3.1, 3.6, 3.9, 3.4, 3.4, 2.9, 3.1,
+                           2.8, 2.9, 3.0, 2.7, 2.8, 2.9, 3.0, 2.8, 2.7, 2.9,
+                           3.0, 3.1, 3.2, 2.9, 3.0, 3.1, 3.2, 3.0, 2.9, 3.1],
+            'petal_length': [1.4, 1.4, 1.3, 1.5, 1.4, 1.7, 1.4, 1.5, 1.4, 1.5,
+                            4.3, 4.4, 4.5, 4.2, 4.3, 4.4, 4.5, 4.3, 4.2, 4.4,
+                            5.6, 5.7, 5.8, 5.5, 5.6, 5.7, 5.8, 5.6, 5.5, 5.7],
+            'petal_width': [0.2, 0.2, 0.2, 0.2, 0.2, 0.4, 0.3, 0.2, 0.2, 0.1,
+                           1.3, 1.4, 1.5, 1.2, 1.3, 1.4, 1.5, 1.3, 1.2, 1.4,
+                           2.0, 2.1, 2.2, 1.9, 2.0, 2.1, 2.2, 2.0, 1.9, 2.1],
+            'species': ['setosa'] * 10 + ['versicolor'] * 10 + ['virginica'] * 10
         })
         
         self.validator = DataValidator(self.config)
