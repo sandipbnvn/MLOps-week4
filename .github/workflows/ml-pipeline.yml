@@ -80,59 +80,13 @@ jobs:
         REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         cd mlops-pipeline
-        
-        # Load metrics from the pipeline output
-        if [ -f "artifacts/metrics.json" ]; then
-          # Create a temporary Python script to extract accuracy
-          cat > extract_accuracy.py << 'EOF'
-import json
-import sys
-
-try:
-    with open("artifacts/metrics.json", "r") as f:
-        data = json.load(f)
-    
-    metrics = data.get("metrics", {})
-    accuracy = metrics.get("accuracy", "N/A")
-    
-    if isinstance(accuracy, (int, float)):
-        print(f"**Accuracy Score:** {accuracy:.4f}")
-    else:
-        print(f"**Accuracy Score:** {accuracy}")
-    
-except Exception as e:
-    print(f"**Error loading metrics:** {str(e)}")
-    sys.exit(1)
-EOF
-          
-          # Run the Python script to get accuracy
-          python extract_accuracy.py > accuracy_output.txt
-          
-          echo "## 📊 Model Performance Report" > report.md
-          echo "" >> report.md
-          echo "```" >> report.md
-          cat accuracy_output.txt >> report.md
-          echo "```" >> report.md
-          echo "metrics from training" >> report.md
-          cat artifacts/metrics.json >> report.md
-        else
-          echo "## ❌ Pipeline Failed" > report.md
-          echo "" >> report.md
-          echo "The MLOps pipeline failed to complete successfully." >> report.md
-          echo "Please check the logs for more details." >> report.md
-        fi
-        
+        echo "test output" > report.md
+        echo "\`\`\`" >> report.md
+        cat artifacts/pipeline_results.json >> report.md
+        echo "\`\`\`" > report.md
+        echo "metrics from training" >> report.md
+        cat artifacts/metrics.json >> report.md
         cml comment create --publish report.md
-    
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: ml-artifacts
-        path: |
-          mlops-pipeline/artifacts/
-          mlops-pipeline/coverage.xml
-          mlops-pipeline/htmlcov/
-        retention-days: 30
 
   quality-check:
     needs: test
