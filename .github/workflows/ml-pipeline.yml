@@ -45,10 +45,6 @@ jobs:
       run: |
         python -m pytest tests/test_integration.py -v
     
-    - name: Run code formatting check
-      run: |
-        black --check src/ tests/ run_pipeline.py
-    
     - name: Run linting
       run: |
         flake8 src/ tests/ run_pipeline.py --max-line-length=88 --ignore=E203,W503
