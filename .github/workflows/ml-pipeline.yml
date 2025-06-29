@@ -75,7 +75,7 @@ jobs:
     - name: Setup CML
       uses: iterative/setup-cml@v1
     
-    - name: Generate and post accuracy report
+    - name: Create CML report
       env:
         REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -83,11 +83,8 @@ jobs:
         
         # Load metrics from the pipeline output
         if [ -f "artifacts/metrics.json" ]; then
-          echo "## 📊 Model Performance Report" >> report.md
-          echo "" >> report.md
-          
-          # Extract accuracy score using Python
-          python -c '
+          # Create a temporary Python script to extract accuracy
+          cat > extract_accuracy.py << 'EOF'
 import json
 import sys
 
@@ -106,17 +103,26 @@ try:
 except Exception as e:
     print(f"**Error loading metrics:** {str(e)}")
     sys.exit(1)
-' >> report.md
-        
+EOF
+          
+          # Run the Python script to get accuracy
+          python extract_accuracy.py > accuracy_output.txt
+          
+          echo "## 📊 Model Performance Report" > report.md
+          echo "" >> report.md
+          echo "```" >> report.md
+          cat accuracy_output.txt >> report.md
+          echo "```" >> report.md
+          echo "metrics from training" >> report.md
+          cat artifacts/metrics.json >> report.md
         else
-          echo "## ❌ Pipeline Failed" >> report.md
+          echo "## ❌ Pipeline Failed" > report.md
           echo "" >> report.md
           echo "The MLOps pipeline failed to complete successfully." >> report.md
           echo "Please check the logs for more details." >> report.md
         fi
         
-        # Post the report as a comment on the PR
-        cml comment create report.md --pr-id ${{ github.event.pull_request.number }}
+        cml comment create --publish report.md
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
