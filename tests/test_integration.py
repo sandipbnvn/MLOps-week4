@@ -35,49 +35,76 @@ class TestIntegrationPipeline(unittest.TestCase):
     
     def tearDown(self):
         """Clean up test fixtures."""
+        # Close all loggers to release file handles
+        import logging
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+            handler.close()
+        
+        # Change back to original directory
         os.chdir(self.original_cwd)
-        shutil.rmtree(self.test_dir)
+        
+        # Remove test directory with error handling
+        try:
+            shutil.rmtree(self.test_dir)
+        except PermissionError:
+            # If files are still in use, try to remove them individually
+            import time
+            time.sleep(0.1)  # Small delay to allow file handles to close
+            try:
+                shutil.rmtree(self.test_dir)
+            except PermissionError:
+                # If still failing, just log the issue but don't fail the test
+                print(f"Warning: Could not remove test directory {self.test_dir}")
+        except FileNotFoundError:
+            # Directory already removed
+            pass
     
     def create_test_data(self):
         """Create test Iris dataset."""
         # Create data directory
         os.makedirs('data', exist_ok=True)
         
-        # Generate synthetic Iris data
+        # Generate synthetic Iris data with realistic ranges that match validator constraints
         np.random.seed(42)
         n_samples = 150
         
-        # Setosa (first 50 samples)
+        # Setosa (first 50 samples) - within expected ranges
         setosa_data = {
-            'sepal_length': np.random.normal(5.0, 0.35, 50),
-            'sepal_width': np.random.normal(3.4, 0.38, 50),
-            'petal_length': np.random.normal(1.5, 0.17, 50),
-            'petal_width': np.random.normal(0.2, 0.11, 50),
+            'sepal_length': np.clip(np.random.normal(5.0, 0.3, 50), 4.0, 8.0),
+            'sepal_width': np.clip(np.random.normal(3.4, 0.3, 50), 2.0, 5.0),
+            'petal_length': np.clip(np.random.normal(1.5, 0.2, 50), 1.0, 7.0),
+            'petal_width': np.clip(np.random.normal(0.2, 0.1, 50), 0.1, 2.5),
             'species': ['setosa'] * 50
         }
         
-        # Versicolor (next 50 samples)
+        # Versicolor (next 50 samples) - within expected ranges
         versicolor_data = {
-            'sepal_length': np.random.normal(5.9, 0.52, 50),
-            'sepal_width': np.random.normal(2.8, 0.31, 50),
-            'petal_length': np.random.normal(4.3, 0.47, 50),
-            'petal_width': np.random.normal(1.3, 0.20, 50),
+            'sepal_length': np.clip(np.random.normal(5.9, 0.4, 50), 4.0, 8.0),
+            'sepal_width': np.clip(np.random.normal(2.8, 0.3, 50), 2.0, 5.0),
+            'petal_length': np.clip(np.random.normal(4.3, 0.4, 50), 1.0, 7.0),
+            'petal_width': np.clip(np.random.normal(1.3, 0.2, 50), 0.1, 2.5),
             'species': ['versicolor'] * 50
         }
         
-        # Virginica (last 50 samples)
+        # Virginica (last 50 samples) - within expected ranges
         virginica_data = {
-            'sepal_length': np.random.normal(6.6, 0.64, 50),
-            'sepal_width': np.random.normal(3.0, 0.32, 50),
-            'petal_length': np.random.normal(5.6, 0.55, 50),
-            'petal_width': np.random.normal(2.0, 0.27, 50),
+            'sepal_length': np.clip(np.random.normal(6.6, 0.5, 50), 4.0, 8.0),
+            'sepal_width': np.clip(np.random.normal(3.0, 0.3, 50), 2.0, 5.0),
+            'petal_length': np.clip(np.random.normal(5.6, 0.5, 50), 1.0, 7.0),
+            'petal_width': np.clip(np.random.normal(2.0, 0.3, 50), 0.1, 2.5),
             'species': ['virginica'] * 50
         }
         
-        # Combine all data
+        # Combine all data properly
         all_data = {}
         for key in setosa_data.keys():
-            all_data[key] = setosa_data[key] + versicolor_data[key] + virginica_data[key]
+            if key == 'species':
+                # For species column, concatenate lists
+                all_data[key] = setosa_data[key] + versicolor_data[key] + virginica_data[key]
+            else:
+                # For numeric columns, concatenate numpy arrays
+                all_data[key] = np.concatenate([setosa_data[key], versicolor_data[key], virginica_data[key]])
         
         # Create DataFrame and save
         df = pd.DataFrame(all_data)
