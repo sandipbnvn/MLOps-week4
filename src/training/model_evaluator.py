@@ -12,6 +12,8 @@ from sklearn.metrics import (
 from typing import Dict, Any, Tuple, Optional
 import json
 import os
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend to avoid Tcl/Tk issues
 import matplotlib.pyplot as plt
 import seaborn as sns
 import logging

@@ -75,7 +75,7 @@ class TestDataProcessor(unittest.TestCase):
         
         # Test with non-numeric feature columns
         invalid_data = self.sample_data.copy()
-        invalid_data['sepal_length'] = ['a', 'b', 'c', 'd', 'e']
+        invalid_data['sepal_length'] = ['a'] * 30  # 30 values to match DataFrame length
         self.data_processor.data = invalid_data
         is_valid = self.data_processor.validate_data()
         self.assertFalse(is_valid)

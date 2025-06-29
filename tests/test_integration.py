@@ -35,8 +35,30 @@ class TestIntegrationPipeline(unittest.TestCase):
     
     def tearDown(self):
         """Clean up test fixtures."""
+        # Close all loggers to release file handles
+        import logging
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
+            handler.close()
+        
+        # Change back to original directory
         os.chdir(self.original_cwd)
-        shutil.rmtree(self.test_dir)
+        
+        # Remove test directory with error handling
+        try:
+            shutil.rmtree(self.test_dir)
+        except PermissionError:
+            # If files are still in use, try to remove them individually
+            import time
+            time.sleep(0.1)  # Small delay to allow file handles to close
+            try:
+                shutil.rmtree(self.test_dir)
+            except PermissionError:
+                # If still failing, just log the issue but don't fail the test
+                print(f"Warning: Could not remove test directory {self.test_dir}")
+        except FileNotFoundError:
+            # Directory already removed
+            pass
     
     def create_test_data(self):
         """Create test Iris dataset."""
